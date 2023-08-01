@@ -1,6 +1,6 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import JobFindingMainPage from "./assets/Job-Finding-Display/JobFindingMainPage";
+import JobFindingMainPage from "./Component/Job-Finding-Display/JobFindingMainPage";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 function App() {

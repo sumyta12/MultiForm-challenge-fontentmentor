@@ -1,6 +1,6 @@
 import "./../JobFinding/Jobfinding.css";
 import Container from "react-bootstrap/Container";
-import Joblistingdata from "./../../../public/data.json";
+import Joblistingdata from "../../../public/data.json";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -67,8 +67,8 @@ const JobFindingMainPage = () => {
       });
 
       const url = searchParams;
-        url.delete(keys, value);
-        setSearchParams(url);
+      url.delete(keys, value);
+      setSearchParams(url);
     }
   }
 
