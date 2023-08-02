@@ -8,70 +8,100 @@ const JobFindingMainPage = () => {
   const [joblist, setJoblisting] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [updatequery, setUpdatequery] = useState(null);
-  //   const searchGet = searchParams.get("");
+  const [displaySearch, setDisplaySearch] = useState({});
 
   useEffect(() => {
     setJoblisting([...Joblistingdata]);
   }, []);
 
   useEffect(() => {
-    const geturl = searchParams.toString();
-    const Params = new URLSearchParams(geturl);
+    const urlParams = new URLSearchParams();
 
-    const GetparamItem = [...Params].map(([key, value]) => {
-      return {
-        [key]: value,
-      };
-    });
+    for (const key in displaySearch) {
+      if (Array.isArray(displaySearch[key])) {
+        displaySearch[key].forEach((value) => {
+          urlParams.append(key, value);
+        });
+      } else {
+        urlParams.set(key, displaySearch[key]);
+      }
+    }
 
-    setUpdatequery(Object.assign({}, ...GetparamItem));
-  }, []);
+    const queryString = urlParams.toString();
+
+    setSearchParams(queryString);
+    setUpdatequery(Object.assign({}, { ...displaySearch }));
+  }, [displaySearch, setSearchParams]);
 
   const filterSearchResult =
     joblist.length > 0 && updatequery ? UpdateFunctioncall() : joblist;
 
   function UpdateFunctioncall() {
-    const filteredData = joblist.filter((item) => {
-      return Object.entries(updatequery).every(([key, value]) => {
-        if (Array.isArray(item[key])) {
-          return item[key].includes(value);
+    const filteredJobs = joblist?.filter((item) => {
+      return Object.entries(updatequery).every(([key, values]) => {
+        if (Array.isArray(updatequery[key])) {
+          return values.every((value) => item[key].includes(value));
+        } else if (item[key].includes(values)) {
+          return true;
         } else {
-          return item[key] === value;
+          return item[key] === values;
         }
       });
     });
 
-    return filteredData;
+    return filteredJobs;
   }
 
   function handlerClick(props) {
+    const keys = Object.keys(props)[0];
+    const valueit = Object.values(props)[0];
+    const newAdjustmentobj = { ...displaySearch };
+
+    if (newAdjustmentobj[keys] === valueit) {
+      // If the value matches, no need to make changes
+    } else if (Array.isArray(newAdjustmentobj[keys])) {
+      if (!newAdjustmentobj[keys].includes(valueit)) {
+        newAdjustmentobj[keys] = [...newAdjustmentobj[keys], valueit];
+      }
+    } else if (typeof newAdjustmentobj[keys] === "string") {
+      newAdjustmentobj[keys] = [newAdjustmentobj[keys], valueit];
+    } else {
+      newAdjustmentobj[keys] = valueit;
+    }
+    setDisplaySearch(newAdjustmentobj);
+  }
+
+  function handlerRemove(props) {
     if (Object.keys(props).length === 0) {
       setSearchParams({});
       setUpdatequery(null);
+      setDisplaySearch({});
     } else {
-      const keys = Object.keys(props)[0];
-      const value = Object.values(props)[0];
-      setUpdatequery((prev) => {
-        const v = Object.assign(
-          {},
-          ...Object.entries(prev)
-            .filter(([key]) => key !== keys)
-            .map(([key, value]) => {
-              return {
-                [key]: value,
-              };
-            })
-        );
+      const keysw = Object.keys(props)[0];
+      const valueit = Object.values(props)[0];
 
-        return v;
-      });
+      const detectdisplaysearch = { ...displaySearch };
+
+      if (Array.isArray(detectdisplaysearch[keysw])) {
+        detectdisplaysearch[keysw] = detectdisplaysearch[keysw].filter(
+          (item) => item !== valueit
+        );
+        if (detectdisplaysearch[keysw].length === 0) {
+          delete detectdisplaysearch[keysw];
+        }
+      } else {
+        delete detectdisplaysearch[keysw];
+      }
+      setDisplaySearch(detectdisplaysearch);
+
+      setUpdatequery(detectdisplaysearch);
 
       const url = searchParams;
-      url.delete(keys, value);
+      url.delete(keysw, valueit);
       setSearchParams(url);
     }
   }
-
+ 
   const joblistRender =
     joblist.length > 0 ? (
       filterSearchResult?.map(
@@ -90,16 +120,39 @@ const JobFindingMainPage = () => {
           role,
           tools,
         }) => {
-          const jobquery = [...languages, ...tools, level, role]
-            ?.sort((a, b) => b.length - a.length)
-            .map((item, index) => {
+          const queryObjMaker = Object.entries({
+            languages,
+            tools,
+            level,
+            role,
+          }).map(([key, value]) => {
+            return { [key]: value };
+          });
+
+          const filter = Object.entries(queryObjMaker).map(([key, value]) => {
+            const keys = Object.keys(value)[0];
+            const values = Object.values(value);
+
+            if (typeof values[0] === "string") {
               return (
-                <button className="job-tag" key={index}>
-                  {" "}
-                  {item}{" "}
+                <button
+                  onClick={() => handlerClick({ [keys]: values[0] })}
+                  className="job-tag"
+                  key={values[0]}>
+                  {values[0]}
                 </button>
               );
-            });
+            } else {
+              return values[0].map((item) => (
+                <button
+                  onClick={() => handlerClick({ [keys]: item })}
+                  className="job-tag"
+                  key={item}>
+                  {item}
+                </button>
+              ));
+            }
+          });
 
           return (
             <div key={id} className="job-card">
@@ -126,7 +179,7 @@ const JobFindingMainPage = () => {
                 </p>
               </div>
 
-              <div className="card-tags">{jobquery}</div>
+              <div className="card-tags">{filter}</div>
             </div>
           );
         }
@@ -135,53 +188,60 @@ const JobFindingMainPage = () => {
       <h1>Comming...........</h1>
     );
 
+  const queryElementRender = Object.entries(displaySearch)?.map(
+    ([key, value]) => {
+      if (typeof value === "string") {
+        return (
+          <h3 key={value} className="filter-tag">
+            {value}
+            <button
+              onClick={() => handlerRemove({ [key]: value })}
+              className="remove-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                <title>remove filter</title>
+                <path
+                  fill="#FFF"
+                  d="M11.314 0l2.121 2.121-4.596 4.596 4.596 4.597-2.121 2.121-4.597-4.596-4.596 4.596L0 11.314l4.596-4.597L0 2.121 2.121 0l4.596 4.596L11.314 0z"></path>
+              </svg>
+            </button>
+          </h3>
+        );
+      } else if (Array.isArray(value)) {
+        return value.map((item) => (
+          <h3 key={item} className="filter-tag">
+            {item}
+            <button
+              onClick={() => handlerRemove({ [key]: item })}
+              className="remove-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+                <title>remove filter</title>
+                <path
+                  fill="#FFF"
+                  d="M11.314 0l2.121 2.121-4.596 4.596 4.596 4.597-2.121 2.121-4.597-4.596-4.596 4.596L0 11.314l4.596-4.597L0 2.121 2.121 0l4.596 4.596L11.314 0z"></path>
+              </svg>
+            </button>
+          </h3>
+        ));
+      }
+    }
+  );
+
   return (
     <div>
       <div className="header"></div>
       <Container>
-        <div className="filters-container">
-          <div className="filters">
-            <div className="active-filters">
-              <h3
-                onClick={() => handlerClick({ role: "Frontend" })}
-                className="filter-tag">
-                Frontend
-                <button className="remove-btn">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14">
-                    <title>remove filter</title>
-                    <path
-                      fill="#FFF"
-                      d="M11.314 0l2.121 2.121-4.596 4.596 4.596 4.597-2.121 2.121-4.597-4.596-4.596 4.596L0 11.314l4.596-4.597L0 2.121 2.121 0l4.596 4.596L11.314 0z"></path>
-                  </svg>
-                </button>
-              </h3>
+        {Object.keys(displaySearch).length > 0 && (
+          <div className="filters-container">
+            <div className="filters">
+              <div className="active-filters">{queryElementRender}</div>
 
-              <h3
-                onClick={() => handlerClick({ languages: "JavaScript" })}
-                className="filter-tag">
-                JavaScript
-                <button className="remove-btn">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14">
-                    <title>remove filter</title>
-                    <path
-                      fill="#FFF"
-                      d="M11.314 0l2.121 2.121-4.596 4.596 4.596 4.597-2.121 2.121-4.597-4.596-4.596 4.596L0 11.314l4.596-4.597L0 2.121 2.121 0l4.596 4.596L11.314 0z"></path>
-                  </svg>
-                </button>
-              </h3>
+              <button className="clear-btn" onClick={() => handlerRemove({})}>
+                Clear
+              </button>
             </div>
-
-            <button className="clear-btn" onClick={() => handlerClick({})}>
-              Clear
-            </button>
           </div>
-        </div>
+        )}
+
         <div className="main--job--display">{joblistRender}</div>
       </Container>
     </div>

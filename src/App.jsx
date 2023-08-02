@@ -8,7 +8,10 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<JobFindingMainPage />} />
+          <Route
+            path="/"
+            element={<JobFindingMainPage />}
+          />
           <Route path="/about" element={<h1>this is not found path</h1>} />
         </Routes>
       </BrowserRouter>
