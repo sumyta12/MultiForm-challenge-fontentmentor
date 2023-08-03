@@ -101,7 +101,7 @@ const JobFindingMainPage = () => {
       setSearchParams(url);
     }
   }
- 
+
   const joblistRender =
     joblist.length > 0 ? (
       filterSearchResult?.map(
@@ -137,16 +137,29 @@ const JobFindingMainPage = () => {
               return (
                 <button
                   onClick={() => handlerClick({ [keys]: values[0] })}
-                  className="job-tag"
+                  className={`job-tag ${
+                    updatequery &&
+                    Object.keys(updatequery).length !== 0 &&
+                    updatequery[keys] === values[0]
+                      ? "Click-change-color"
+                      : ""
+                  }`}
                   key={values[0]}>
                   {values[0]}
                 </button>
               );
             } else {
-              return values[0].map((item) => (
+              return values[0]?.map((item) => (
                 <button
                   onClick={() => handlerClick({ [keys]: item })}
-                  className="job-tag"
+                  className={`job-tag ${
+                    updatequery &&
+                    updatequery &&
+                    Object.keys(updatequery).length !== 0 &&
+                    updatequery[keys]?.includes(item)
+                      ? "Click-change-color"
+                      : ""
+                  }`}
                   key={item}>
                   {item}
                 </button>
@@ -229,6 +242,7 @@ const JobFindingMainPage = () => {
   return (
     <div>
       <div className="header"></div>
+
       <Container>
         {Object.keys(displaySearch).length > 0 && (
           <div className="filters-container">
