@@ -369,7 +369,7 @@ const Interactive = () => {
 
         const repleyhtml = replies?.map((reply) => {
           return (
-            <div key={reply?.id}>
+            <div key={reply?.id} style={{ width: "100%" }}>
               <RenderHtml
                 item={reply}
                 updatEditChange={updatEditChange}
@@ -440,7 +440,6 @@ const Interactive = () => {
               currentuser={username}
               handlerbtnClickpostivie={handlerbtnClickpostivie}
               handlerbtnClickNegative={handlerbtnClickNegative}
-              
             />
             <div className="reply-container">{repleyhtml}</div>
 
