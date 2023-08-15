@@ -26,6 +26,14 @@ export function RenderHtml({
   });
 
   const MainUserSelection = currentuser === username ? true : false;
+  const Contentbreak = content?.split(" ")[0].startsWith("@") ? (
+    <div className="comment-content">
+      <span className="replyingTo">{content.split(" ")[0]}</span>
+      {content.split(" ").slice(1, content.length).join(" ")}
+    </div>
+  ) : (
+    <div className="comment-content">{content}</div>
+  );
 
   const userIcone = MainUserSelection ? (
     <div className="div--style--me">
@@ -110,7 +118,7 @@ export function RenderHtml({
             </button>
           </div>
         ) : (
-          <div className="comment-content">{content}</div>
+          <>{Contentbreak}</>
         )}
       </div>
     </div>
