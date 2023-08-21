@@ -15,7 +15,7 @@ const MultifromLeftside = () => {
     option: [
       {
         id: 1,
-        image: "./../../public/images/assets/images/icon-arcade.svg",
+        image: "./../../public/images/icon-arcade.svg",
         name: "Arcade",
         pricing: [
           { montly: "$9/mo", userclick: true },
@@ -26,7 +26,7 @@ const MultifromLeftside = () => {
       },
       {
         id: 2,
-        image: "./../../public/images/assets/images/icon-advanced.svg",
+        image: "./../../public/images/icon-advanced.svg",
         name: "Advanced",
         pricing: [
           { montly: "$12/mo", userclick: false },
@@ -37,7 +37,7 @@ const MultifromLeftside = () => {
       },
       {
         id: 3,
-        image: "./../../public/images/assets/images/icon-pro.svg",
+        image: "./../../public/images/icon-pro.svg",
         name: "Pro",
         pricing: [
           { montly: "$15/mo", userclick: false },
